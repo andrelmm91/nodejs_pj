@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const mongoDBSession = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
+const flash = require("connect-flash");
 const helmet = require("helmet");
 
 const errorController = require("./controllers/error");
@@ -17,6 +18,7 @@ const store = new mongoDBSession({
   uri: mongodbConnection,
   collection: "sessions",
 });
+const csrfProtection = csrf();
 
 app.set("view engine", "ejs");
 app.set("views", "views");
@@ -24,11 +26,11 @@ app.set("views", "views");
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
-const csrfProtection = csrf();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(helmet());
+
 app.use(
   session({
     secret: "my secret",
@@ -38,6 +40,7 @@ app.use(
   })
 );
 app.use(csrfProtection);
+app.use(flash());
 
 app.use(
   session((req, res, next) => {
