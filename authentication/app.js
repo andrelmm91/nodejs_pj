@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const mongoDBSession = require("connect-mongodb-session")(session);
-const csurf = require("csurf");
+const csrf = require("csurf");
 const helmet = require("helmet");
 
 const errorController = require("./controllers/error");
@@ -24,7 +24,7 @@ app.set("views", "views");
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
-const csurfProtection = csurf();
+const csrfProtection = csrf();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
@@ -37,7 +37,7 @@ app.use(
     store: store,
   })
 );
-app.use(csurfProtection);
+app.use(csrfProtection);
 
 app.use(
   session((req, res, next) => {
@@ -53,7 +53,7 @@ app.use(
 
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.session.isLoggedIn;
-  res.locals.csurfToken = req.csurfToken();
+  res.locals.csrfToken = req.csrfToken();
   next();
 });
 
