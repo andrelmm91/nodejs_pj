@@ -1,18 +1,23 @@
 const { validationResult } = require("express-validator"); //validator
 const Post = require("../models/posts");
+
 exports.getPosts = (req, res, next) => {
-  res.status(200).json({
-    posts: [
-      {
-        _id: "1",
-        title: "firstaaaoi",
-        content: "first",
-        imagesUrl: "images/dog.jpeg",
-        creator: { name: "And" },
-        createdAt: new Date(),
-      },
-    ],
-  });
+  // fetch all posts from database
+  Post.find()
+    .then((posts) => {
+      // return status code 200 and the fetched posts
+      res
+        .status(200)
+        .json({ message: "successfully fecthed the posts.", posts: posts });
+    })
+    .catch((err) => {
+      // handle errors
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      err.message = "Error loading it.";
+      next(err);
+    });
 };
 
 exports.createPosts = (req, res, next) => {
@@ -49,6 +54,36 @@ exports.createPosts = (req, res, next) => {
         err.statusCode = 500;
       }
       err.message = "Error saving it.";
+      next(err);
+    });
+};
+
+exports.getPost = (req, res, next) => {
+  // Extract postId from params
+  const postId = req.params.postId;
+  // Find post by ID using the Promise API
+  Post.findById(postId)
+    .then((post) => {
+      // If no post found, throw an error
+      if (!post) {
+        const err = new Error("could not find post.");
+        err.statusCode = 404;
+        throw err;
+      }
+      // If post found, return success status with the post
+      res.status(200).json({
+        message: "successfully fetched post.",
+        post: post,
+      });
+    })
+    .catch((err) => {
+      // If an error occurred, check if it has a status code
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      // Modify the error message
+      err.message = "Error loading post.";
+      // Pass the error to the next middleware function
       next(err);
     });
 };

@@ -5,6 +5,7 @@ const { body } = require("express-validator"); //validator
 
 // GET / feed/posts
 router.get("/posts", feedController.getPosts);
+
 // POST / feed/posts
 router.post(
   "/posts",
@@ -14,5 +15,7 @@ router.post(
   ],
   feedController.createPosts
 );
+
+router.get("/post/:postId", feedController.getPost);
 
 module.exports = router;
