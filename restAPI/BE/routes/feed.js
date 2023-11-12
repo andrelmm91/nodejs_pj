@@ -9,14 +9,8 @@ router.get("/posts", feedController.getPosts);
 router.post(
   "/posts",
   [
-    body("title")
-      .trim()
-      .isLength({ min: 6 })
-      .withMessage("Title must be at least 6 characters long"),
-    body("content")
-      .trim()
-      .isLength({ min: 6 })
-      .withMessage("Content must be at least 6 characters long"),
+    body("title").trim().isLength({ min: 5 }),
+    body("content").trim().isLength({ min: 5 }),
   ],
   feedController.createPosts
 );
