@@ -1,0 +1,34 @@
+version: "3"
+services:
+  backend:
+    build:
+      context: ./BE
+      dockerfile: Dockerfile
+    container_name: backend
+    command: npm start
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./BE:/app
+    networks:
+      - my-network
+  frontend:
+    build: 
+      context: ./FE
+      dockerfile: Dockerfile
+    container_name: frontend
+    command: npm run dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./FE:/app
+    depends_on:
+      - backend
+    networks:
+      - my-network
+
+networks:
+  my-network:
+
+# PS:
+## we dont need to specify the network
