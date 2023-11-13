@@ -8,7 +8,7 @@ const authController = require("../controllers/auth");
 router.put(
   "/signup",
   [
-    body("name")
+    body("email")
       .isEmail()
       .withMessage("please, enter a valid email")
       .custom((value, { req }) => {
@@ -24,5 +24,7 @@ router.put(
   ],
   authController.signup
 );
+
+router.post("/login", authController.login);
 
 module.exports = router;
