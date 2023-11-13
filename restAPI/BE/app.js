@@ -1,7 +1,6 @@
 // External Dependencies
 const express = require("express");
 const path = require("path");
-const feedRoutes = require("./routes/feed");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const multer = require("multer");
@@ -9,7 +8,11 @@ const { v4: uuidv4 } = require("uuid");
 const app = express();
 
 //Internal Dependencies
+const feedRoutes = require("./routes/feed");
+const authRoutes = require("./routes/auth");
+
 const { mongodbConnection } = require("./mongodb/mongodbConnection");
+//Image storage
 const FileStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "images");
@@ -48,15 +51,18 @@ app.use((req, res, next) => {
 
 // Routes
 app.use("/feed", feedRoutes);
+app.use("/auth", authRoutes);
 
 // Error handler
 app.use((error, req, res, next) => {
   console.error(error);
   const status = error.statusCode || 500;
   const message = error.message;
-  res.status(status).json({ message: message });
+  const data = error.data;
+  res.status(status).json({ message: message, data: data });
 });
 
+//connect to database and listen to port
 mongoose
   .connect(mongodbConnection + "?retryWrites=true")
   .then(() => {

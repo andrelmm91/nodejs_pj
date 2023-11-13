@@ -1,7 +1,7 @@
-const { validationResult } = require("express-validator"); //validator
 const Post = require("../models/posts");
 const fs = require("fs");
 const path = require("path");
+const { validationResult } = require("express-validator"); //validator
 
 exports.getPosts = (req, res, next) => {
   //pagination
