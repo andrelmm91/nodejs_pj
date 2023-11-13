@@ -1,7 +1,9 @@
-const Post = require("../models/posts");
 const fs = require("fs");
 const path = require("path");
 const { validationResult } = require("express-validator"); //validator
+
+const Post = require("../models/post");
+const User = require("../models/user");
 
 exports.getPosts = (req, res, next) => {
   //pagination
@@ -69,21 +71,30 @@ exports.createPosts = (req, res, next) => {
   const title = req.body.title;
   const content = req.body.content;
   const imageUrl = req.file.path.replace("\\", "/");
+  let creator;
   // create new post
   const post = new Post({
     title: title,
     content: content,
     imageUrl: imageUrl,
-    creator: { name: "And" },
+    creator: req.userId,
   });
   // save post to database
   post
     .save()
-    .then((results) => {
-      console.log(results);
+    .then(() => {
+      return User.findById(req.userId);
+    })
+    .then((user) => {
+      creator = user;
+      user.posts.push(post);
+      return user.save();
+    })
+    .then(() => {
       res.status(201).json({
         message: "post created successfully.",
-        post: results,
+        post: post,
+        creator: { _id: creator._id, name: creator.name },
       });
     })
     // syncronouos function... we cannot use throw err, next(err) is the correct way.
@@ -155,6 +166,12 @@ exports.updatePost = (req, res, next) => {
         error.statusCode(404);
         throw err;
       }
+      // only the creator can update/delete it
+      if (post.creator.toString() !== req.userId) {
+        const err = new Error("Not authorized.");
+        err.statusCode(403);
+        throw err;
+      }
       // if (imageUrl !== post.imageUrl) {
       //   clearImage(post.imageUrl);
       // }
@@ -185,7 +202,6 @@ const clearImage = (filePath) => {
 
 exports.deletePost = (req, res, next) => {
   const postId = req.params.postId;
-  console.log("postId", postId);
   Post.findById(postId)
     .then((post) => {
       if (!post) {
@@ -193,11 +209,26 @@ exports.deletePost = (req, res, next) => {
         error.statusCode(404);
         throw err;
       }
-      //check user
+      // only the creator can update/delete it
+      if (post.creator.toString() !== req.userId) {
+        const err = new Error("Not authorized.");
+        err.statusCode(403);
+        throw err;
+      }
       // clearImage(post.imageUrl);
-      return Post.findByIdAndDelete(postId).then((result) => {
-        res.status(200).json({ message: "Post deleted", result: result });
-      });
+      // deleting the post in the post database
+      return Post.findByIdAndDelete(postId);
+    })
+    .then((result) => {
+      return User.findById(req.userId);
+    })
+    .then((user) => {
+      // deleting the post in the user database
+      user.posts.pull(postId);
+      return user.save();
+    })
+    .then((result) => {
+      res.status(200).json({ message: "Post deleted", result: result });
     })
     .catch((err) => {
       // If an error occurred, check if it has a status code

@@ -19,8 +19,9 @@ const postSchema = new Schema(
         "https://static.vecteezy.com/system/resources/thumbnails/002/553/976/small/delivery-cargo-service-logistic-cardboard-box-and-mail-post-line-style-icon-free-vector.jpg",
     },
     creator: {
-      type: Object,
-      required: true,
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: "true",
     },
   },
   { timestamps: true }

@@ -31,9 +31,6 @@ exports.signup = (req, res, next) => {
         userId: results._id,
       })
     )
-    .then(() => {
-      res.json({ message: "User created." });
-    })
     .catch((err) => {
       if (!err.statusCode) {
         err.statusCode = 500;
