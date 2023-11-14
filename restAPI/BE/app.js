@@ -1,11 +1,14 @@
 // External Dependencies
 const express = require("express");
+const fs = require("fs");
 const path = require("path");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
 const app = express();
+const helmet = require("helmet");
+const morgan = require("morgan");
 
 //Internal Dependencies
 const feedRoutes = require("./routes/feed");
@@ -49,6 +52,15 @@ app.use((req, res, next) => {
   next();
 });
 
+// security of headers
+app.use(helmet());
+//Logging
+const accessLogStream = fs.createWriteStream(
+  path.join(__dirname, "access.log"),
+  { flag: "a" }
+);
+app.use(morgan("combined", { stream: accessLogStream }));
+
 // Routes
 app.use("/feed", feedRoutes);
 app.use("/auth", authRoutes);
@@ -67,7 +79,7 @@ mongoose
   .connect(mongodbConnection + "?retryWrites=true")
   .then(() => {
     console.log("connected to mongoDB");
-    app.listen(8080);
+    app.listen(process.env.BE_PORT || 8080);
   })
   .catch((err) => {
     console.log(err);

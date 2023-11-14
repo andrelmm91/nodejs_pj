@@ -1,0 +1,6 @@
+{
+  "env": {
+    "PORT_BE": "8080",
+    "NODE_ENV": "development"
+  }
+}
