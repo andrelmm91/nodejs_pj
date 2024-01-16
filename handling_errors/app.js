@@ -1,5 +1,5 @@
 const path = require("path");
-
+//comment
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
@@ -37,7 +37,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     store: store,
-  })
+  }),
 );
 app.use(csrfProtection);
 app.use(flash());
@@ -51,7 +51,7 @@ app.use(
         next();
       })
       .catch((err) => console.log(err));
-  })
+  }),
 );
 
 app.use((req, res, next) => {
